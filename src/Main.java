@@ -2,6 +2,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -20,11 +21,16 @@ public class Main extends Application
     public static final int width = 800;
     public static final int height = 800;
 
-    static GraphicsContext gc;
-
+    private static final double CENTER_X = width / 2;
+    private static final double CENTER_Y = height / 2;
+    private static GraphicsContext gc;
     private static Color backcolor = Color.rgb(51, 51, 51);
 
     private static Timeline update;
+
+    private static int circleCount = 0;
+    private static int totalCount = 0;
+    private static double estimation = 0;
 
     @Override
     public void start(Stage stage) throws Exception
@@ -33,14 +39,12 @@ public class Main extends Application
         child = root.getChildren();
         Canvas canvas = new Canvas(width, height);
         gc = canvas.getGraphicsContext2D();
-
+        //
         canvas.setLayoutX(0);
         canvas.setLayoutY(0);
         child.addAll(canvas);
         //
         drawBorder();
-        shootDots(400, 400, Color.RED);
-
         //
         root.setOnKeyPressed(e -> {
             switch (e.getCode())
@@ -68,10 +72,11 @@ public class Main extends Application
         update = new Timeline(new KeyFrame(Duration.millis(16), e -> {
             //60 fps
             //System.out.println("loop test");
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10000; i++)
             {
-                shootDots(Utils.getRandom(50, width - 50), Utils.getRandom(50, height - 50), Color.LIME);
+                shootDots();
             }
+            makeEstimation();
             drawBorder();
         }));
         update.setCycleCount(Timeline.INDEFINITE);
@@ -100,11 +105,37 @@ public class Main extends Application
         gc.clearRect(0, 0, width, height);
     }
 
-    private static void shootDots(double x, double y, Color color)
+    private static void drawDot(double x, double y, Color color)
     {
         gc.setStroke(color);
         gc.setLineWidth(1.0);
         gc.strokeRect(x + 0.5, y + 0.5, 0.5, 0.5);
+    }
+
+    private static boolean isInTheCircle(double x, double y)
+    {
+        return (Utils.fastDistance(x, y, CENTER_X, CENTER_Y) <= 122500) ? true : false;
+    }
+
+    private static void shootDots()
+    {
+        double rx = Utils.getRandom(50, 750);
+        double ry = Utils.getRandom(50, 750);
+        if (isInTheCircle(rx, ry))
+        {
+            drawDot(rx, ry, Color.BLUE);
+            circleCount++;
+        } else
+        {
+            drawDot(rx, ry, Color.LIME);
+        }
+        totalCount++;
+    }
+
+    private static void makeEstimation()
+    {
+        estimation = 4 * (circleCount / (double) totalCount);
+        System.out.printf("PI: %1.25f\tC: %6d\tA: %6d\n", estimation, circleCount, totalCount);
     }
 
     public static void main(String[] args)
