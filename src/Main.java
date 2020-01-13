@@ -28,10 +28,10 @@ public class Main extends Application
 
     private static Timeline update;
 
-    private static int circleCount = 0;
-    private static int totalCount = 0;
+    private static long circleCount = 0;
+    private static long totalCount = 0;
     private static double estimation = 0;
-
+    private static int numberOfDarts = 1000;
     @Override
     public void start(Stage stage) throws Exception
     {
@@ -67,12 +67,33 @@ public class Main extends Application
                     System.out.println("Child Count: " + child.size());
                     break;
                 }
+                case F4:
+                {
+                    reset();
+                    break;
+                }
+                case F5:
+                {
+                    if(numberOfDarts > 1000)
+                    {
+                        numberOfDarts -= 1000;
+                    }
+                    break;
+                }
+                case F6:
+                {
+                    if(numberOfDarts < 50000)
+                    {
+                        numberOfDarts += 1000;
+                    }
+                    break;
+                }
             }
         });
-        update = new Timeline(new KeyFrame(Duration.millis(16), e -> {
+        update = new Timeline(new KeyFrame(Duration.millis(32), e -> {
             //60 fps
             //System.out.println("loop test");
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < numberOfDarts; i++) //10000
             {
                 shootDots();
             }
@@ -90,7 +111,14 @@ public class Main extends Application
         stage.show();
         root.requestFocus();
     }
-
+    private static void reset()
+    {
+        clearFrame();
+        numberOfDarts = 1000;
+        circleCount = 0;
+        totalCount = 0;
+        estimation = 0;
+    }
     private static void drawBorder()
     {
         gc.setStroke(Color.SNOW);
